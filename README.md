@@ -33,6 +33,8 @@ Add following code to your configuration file of application:
     'geoIp' => [
         'class' => 'scorpsan\geoip\GeoIp',
         'externalIp' => YII_ENV_DEV,
+// uncomment next line if you register on sypexgeo.net and paste your key        
+//        'keySypex' => 'key-sypexgeo-net-this',
     ],
     ...
 ],
@@ -149,6 +151,76 @@ Offline
      *
      * @return array|false
      */
+```
+
+## Usage Session for minimize requests to Sypexgeo
+
+PHP for controller (for examle)
+
+```php
+/** Get User Country */
+        if (isset($session['_location'])) :
+            $app->params['userCountry'] = $session['_location']['userCountry'];
+            $app->params['userCountryCode'] = $session['_location']['userCountryCode'];
+            $app->params['userCountryRegion'] = $session['_location']['userCountryRegion'];
+            $app->params['userCountryCity'] = $session['_location']['userCountryCity'];
+        else :
+            $geoip = $app->geoip->info;
+            if (isset($geoip->ip)) :
+                $name = 'name_'.$app->language;
+                if (isset($geoip->country->$name))
+                    $app->params['userCountry'] = $geoip->country->$name;
+                else
+                    $app->params['userCountry'] = $geoip->country->name_en;
+                $app->params['userCountryCode'] = mb_strtolower($geoip->country->iso, 'UTF-8');
+                if (isset($geoip->region->$name))
+                    $app->params['userCountryRegion'] = $geoip->region->$name;
+                else
+                    $app->params['userCountryRegion'] = $geoip->region->name_en;
+                if (isset($geoip->city->$name))
+                    $app->params['userCountryCity'] = $geoip->city->$name;
+                else
+                    $app->params['userCountryCity'] = $geoip->city->name_en;
+                $session['_location'] = [
+                    'userCountry' => $app->params['userCountry'],
+                    'userCountryCode' => $app->params['userCountryCode'],
+                    'userCountryRegion' => $app->params['userCountryRegion'],
+                    'userCountryCity' => $app->params['userCountryCity'],
+                ];
+            else :
+                $geoip = $app->geoip->infoDb;
+                if (isset($geoip['ipAddress'])) :
+                    $app->params['userCountry'] = $geoip['countryName'];
+                    $app->params['userCountryCode'] = mb_strtolower($geoip['countryCode'], 'UTF-8');
+                    $session['_location'] = [
+                        'userCountry' => $app->params['userCountry'],
+                        'userCountryCode' => $app->params['userCountryCode'],
+                        'userCountryRegion' => $app->params['userCountryRegion'],
+                        'userCountryCity' => $app->params['userCountryCity'],
+                    ];
+                else :
+                    $session['_location'] = [
+                        'userCountry' => $app->params['userCountry'],
+                        'userCountryCode' => $app->params['userCountryCode'],
+                        'userCountryRegion' => $app->params['userCountryRegion'],
+                        'userCountryCity' => $app->params['userCountryCity'],
+                    ];
+                endif;
+            endif;
+        endif;
+```
+
+params.php
+
+```php
+return [
+    ...
+    'userCountry' => 'World',
+    'userCountryCode' => 'wl',
+    'userCountryRegion' => '',
+    'userCountryCity' => '',
+    ...
+];
 ```
 
 ## License
