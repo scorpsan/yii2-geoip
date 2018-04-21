@@ -89,11 +89,9 @@ class GeoIp extends Component {
             "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
             $_SERVER['HTTP_USER_AGENT']
         );
-        $geo = !$is_bot ? json_decode(file_get_contents('http://api.sypexgeo.net/json/'), true) : [];
-        var_dump($geo);
         if (!$is_bot) :
             $curl = new curl\Curl();
-            $response = json_decode($curl->get('http://api.sypexgeo.net/json/'));
+            $response = json_decode($curl->get(self::URL_API . '/json/'));
             if (empty($response->ip))
                 return false;
             return $response;
@@ -109,18 +107,15 @@ class GeoIp extends Component {
      *
      * @return array|false
      */
-    public function getInfoDb() {
+    public function getInfoDb($id = null) {
         $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/databases/IP2LOCATION-LITE-DB1.BIN');
         if (!$this->externalIp) :
-            echo '1';
             $result = $response->lookup(Yii::$app->request->userIP);
         else :
-            echo $this->getIp();
             $result = $response->lookup($this->getIp());
         endif;
-        if ($result['countryCode'] == 'Invalid IP address.') :
+        if ($result['countryCode'] == 'Invalid IP address.')
             return false;
-        endif;
         return $result;
     }
 
@@ -130,13 +125,14 @@ class GeoIp extends Component {
      */
     public function getIp() {
         $curl = new curl\Curl();
-        $response = json_decode($curl->get(self::URL_API . '/json/'));
-        if ($curl->get(self::URL_API . '/json/')) {
-            if (empty($response->ip)) {
+        if (!$this->externalIp) :
+            return Yii::$app->request->userIP;
+        else :
+            $response = json_decode($curl->get(self::URL_API . '/json/'));
+            if (empty($response->ip))
                 return false;
-            }
             return $response->ip;
-        }
+        endif;
         return false;
     }
 }
