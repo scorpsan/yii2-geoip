@@ -2,6 +2,7 @@
 
 namespace scorpsan\geoip;
 
+use app\controllers\AppController;
 use Yii;
 use yii\base\Component;
 use linslin\yii2\curl;
@@ -18,6 +19,13 @@ class GeoIp extends Component {
      * Else, via \yii\web\Request::$userIP.
      */
     public $externalIp = false;
+
+    /**
+     * @var string Whether set `` then only 10000/month request available to Sypexgeo API.
+     * if set key (for register users on Sypexgeo) min 30000/month free or more for paid
+     * more info on https://sypexgeo.net/
+     */
+    public $keySypex = '';
 
     /**
      * Returned information by IP address with following paramters:
@@ -90,8 +98,13 @@ class GeoIp extends Component {
             $_SERVER['HTTP_USER_AGENT']
         );
         if (!$is_bot) :
+            if (!$this->externalIp) :
+                $userip = Yii::$app->request->userIP;
+            else :
+                $userip = '';
+            endif;
             $curl = new curl\Curl();
-            $response = json_decode($curl->get(self::URL_API . '/json/'));
+            $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip));
             if (empty($response->ip))
                 return false;
             return $response;
@@ -109,11 +122,7 @@ class GeoIp extends Component {
      */
     public function getInfoDb($id = null) {
         $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/databases/IP2LOCATION-LITE-DB1.BIN');
-        if (!$this->externalIp) :
-            $result = $response->lookup(Yii::$app->request->userIP);
-        else :
-            $result = $response->lookup($this->getIp());
-        endif;
+        $result = $response->lookup($this->ip);
         if ($result['countryCode'] == 'Invalid IP address.')
             return false;
         return $result;
@@ -124,16 +133,22 @@ class GeoIp extends Component {
      * @return string|false
      */
     public function getIp() {
-        $curl = new curl\Curl();
         if (!$this->externalIp) :
             return Yii::$app->request->userIP;
         else :
-            $response = json_decode($curl->get(self::URL_API . '/json/'));
-            if (empty($response->ip))
-                return false;
-            return $response->ip;
+            $is_bot = preg_match(
+                "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
+                $_SERVER['HTTP_USER_AGENT']
+            );
+            if (!$is_bot) :
+                $curl = new curl\Curl();
+                $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/'));
+                AppController::debug($response);
+                if (empty($response->ip))
+                    return false;
+                return $response->ip;
+            endif;
         endif;
         return false;
     }
 }
-
