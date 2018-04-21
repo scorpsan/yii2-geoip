@@ -1,0 +1,24 @@
+{
+    "name": "scorpsan/yii2-geoip",
+    "description": "An extension that allows you to obtain the visitor's IP address and location information from any IP address. Uses http://sypexgeo.net/ for online and http://www.ip2location.com/ library for offline data retrieval.",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","ip","location","geo","city","country"],
+    "license": "BSD-3-Clause",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Dzmitry Saniuk",
+            "email": "dima.sanuk@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*",
+        "linslin/yii2-curl": "*",
+        "ip2location/ip2location-php": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "scorpsan\\geoip\\": ""
+        }
+    }
+}
