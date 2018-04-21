@@ -72,8 +72,8 @@ var_dump(Yii::$app->geoIp->ip);
 
 ## Return Data
 
-```php
 Online
+```php
      * Returned information by IP address with following paramters:
      * - `ip`               - Visitor IP address, or IP address specified as parameter.
      * - `city`             - Object Region information
@@ -140,8 +140,8 @@ Online
      */
 ```
 
-```php
 Offline
+```php
      * Returned information by IP address with following paramters:
      * - `ipAddress`       - Visitor IP address, or IP address specified as parameter.
      * - `countryName`     - Name Country in English.
