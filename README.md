@@ -70,6 +70,6 @@ Get User Ip:
 var_dump(Yii::$app->geoIp->ip);
 ```
 
-##License
+## License
 
 yii2-widget-cropbox is released under the BSD 3-Clause License.
