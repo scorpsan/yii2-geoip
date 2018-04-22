@@ -1,6 +1,8 @@
 # yii2-geoip
 
-An extension that allows you to obtain the visitor's IP address and location information from any IP address. Uses http://sypexgeo.net/ for online and http://www.ip2location.com/ library for offline data retrieval.
+An extension that allows you to obtain the visitor's location information from any IP address. Uses http://sypexgeo.net/ for online and http://www.ip2location.com/ library for offline data retrieval.
+
+Расширение, позволяющее получать информацию о местоположении посетителя с любого IP-адреса. Использует http://sypexgeo.net/ для онлайн и http://www.ip2location.com/ библиотеки для офлайн получения данных.
 
 ## Installation
 
