@@ -78,7 +78,7 @@ Online
 ```php
      * Returned information by IP address with following paramters:
      * - `ip`               - Visitor IP address, or IP address specified as parameter.
-     * - `city`             - Object Region information
+     * - `city`             - Object City information
      * -- [id] => 625144
      * -- [lat] => 53.9
      * -- [lon] => 27.56667
