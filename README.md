@@ -135,8 +135,8 @@ Online
      * -- [utc] => 3
      * - `error`            - Error data.
      * - `request`          - Request code.
-     * - `created`          - Date create info in dstsbase.
-     * - `timestamp`        - Timestanp request.
+     * - `created`          - Date created info in database.
+     * - `timestamp`        - Timestamp request.
      *
      * @return array|false
      */
