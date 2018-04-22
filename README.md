@@ -158,7 +158,7 @@ Offline
 PHP for controller (for examle)
 
 ```php
-/** Get User Country */
+/** Get User Location */
         if (isset($session['_location'])) :
             $app->params['userCountry'] = $session['_location']['userCountry'];
             $app->params['userCountryCode'] = $session['_location']['userCountryCode'];
@@ -181,32 +181,19 @@ PHP for controller (for examle)
                     $app->params['userCountryCity'] = $geoip->city->$name;
                 else
                     $app->params['userCountryCity'] = $geoip->city->name_en;
-                $session['_location'] = [
-                    'userCountry' => $app->params['userCountry'],
-                    'userCountryCode' => $app->params['userCountryCode'],
-                    'userCountryRegion' => $app->params['userCountryRegion'],
-                    'userCountryCity' => $app->params['userCountryCity'],
-                ];
             else :
                 $geoip = $app->geoip->infoDb;
                 if (isset($geoip['ipAddress'])) :
                     $app->params['userCountry'] = $geoip['countryName'];
                     $app->params['userCountryCode'] = mb_strtolower($geoip['countryCode'], 'UTF-8');
-                    $session['_location'] = [
-                        'userCountry' => $app->params['userCountry'],
-                        'userCountryCode' => $app->params['userCountryCode'],
-                        'userCountryRegion' => $app->params['userCountryRegion'],
-                        'userCountryCity' => $app->params['userCountryCity'],
-                    ];
-                else :
-                    $session['_location'] = [
-                        'userCountry' => $app->params['userCountry'],
-                        'userCountryCode' => $app->params['userCountryCode'],
-                        'userCountryRegion' => $app->params['userCountryRegion'],
-                        'userCountryCity' => $app->params['userCountryCity'],
-                    ];
                 endif;
             endif;
+            $session['_location'] = [
+                'userCountry' => $app->params['userCountry'],
+                'userCountryCode' => $app->params['userCountryCode'],
+                'userCountryRegion' => $app->params['userCountryRegion'],
+                'userCountryCity' => $app->params['userCountryCity'],
+            ];
         endif;
 ```
 
