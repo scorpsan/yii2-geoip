@@ -1,8 +1,6 @@
 <?php
-
 namespace scorpsan\geoip;
 
-use app\controllers\AppController;
 use Yii;
 use yii\base\Component;
 use linslin\yii2\curl;
@@ -143,7 +141,6 @@ class GeoIp extends Component {
             if (!$is_bot) :
                 $curl = new curl\Curl();
                 $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/'));
-                AppController::debug($response);
                 if (empty($response->ip))
                     return false;
                 return $response->ip;
