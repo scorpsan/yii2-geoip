@@ -34,7 +34,6 @@ Add following code to your configuration file of application:
     ...
     'geoIp' => [
         'class' => 'scorpsan\geoip\GeoIp',
-        'externalIp' => YII_ENV_DEV,
 // uncomment next line if you register on sypexgeo.net and paste your key        
 //        'keySypex' => 'key-sypexgeo-net-this',
     ],
