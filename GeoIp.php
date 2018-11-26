@@ -147,10 +147,10 @@ class GeoIp extends Component {
                 $curl = new curl\Curl();
                 $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/'));
                 if (empty($response->ip))
-                    return false;
+                    return Yii::$app->request->userIP;
                 return $response->ip;
             else :
-                $userip = Yii::$app->request->userIP;
+                return Yii::$app->request->userIP;
             endif;
         endif;
         return false;
