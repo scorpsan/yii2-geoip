@@ -105,16 +105,19 @@ class GeoIp extends Component
 			$userip = '';
 		else
 			$userip = Yii::$app->request->userIP;
-
+		$userip = '';
 		$this->httpClient = new \GuzzleHttp\Client([
 			'base_uri' => self::URL_API,
 			'timeout' => 36000,
 			'verify' => false,
 		]);
-		$response = json_decode($this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip));
-		if (empty($response->ip))
-			return false;
-		return $response;
+		$response = $this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip);
+
+		$result = json_decode($response->getBody(), true);
+
+		if (!empty($result['ip'])) return $result;
+
+		return false;
     }
 
     /**
@@ -157,13 +160,14 @@ class GeoIp extends Component
 				'timeout' => 36000,
 				'verify' => false,
 			]);
-			$response = json_decode($this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/'));
-			if (empty($response->ip))
-				return Yii::$app->request->userIP;
-			return $response->ip;
-		} else {
-			return Yii::$app->request->userIP;
+			$response = $this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/');
+
+			$result = json_decode($response->getBody(), true);
+
+			if (!empty($result['ip'])) return $result['ip'];
 		}
+
+		return Yii::$app->request->userIP;
     }
 
 }
