@@ -1,10 +1,10 @@
 <?php
 namespace scorpsan\geoip;
 
-use Yii;
 use yii\base\Component;
 use GuzzleHttp\RequestOptions;
 use IP2Location\Database;
+use Yii;
 
 class GeoIp extends Component
 {
