@@ -8,7 +8,7 @@ use IP2Location\Database;
 
 class GeoIp extends Component
 {
-	private $httpClient;
+    private $httpClient;
     /**
      * URL of API methods.
      */ 
@@ -92,7 +92,7 @@ class GeoIp extends Component
      * @return array|false
      */
     public function getInfo($ip = null)
-	{
+    {
         $is_bot = preg_match(
             "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
             $_SERVER['HTTP_USER_AGENT']
@@ -100,7 +100,7 @@ class GeoIp extends Component
         if ($is_bot) return false;
 
         if ($ip)
-			$userip = $ip;
+            $userip = $ip;
 		elseif (in_array(Yii::$app->request->userIP, $this->localIp))
 			$userip = '';
 		else
