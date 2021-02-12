@@ -1,13 +1,14 @@
 <?php
 namespace scorpsan\geoip;
 
-use app\controllers\AppController;
 use Yii;
 use yii\base\Component;
-use linslin\yii2\curl;
+use GuzzleHttp\RequestOptions;
 use IP2Location\Database;
 
-class GeoIp extends Component {
+class GeoIp extends Component
+{
+	private $httpClient;
     /**
      * URL of API methods.
      */ 
@@ -90,26 +91,30 @@ class GeoIp extends Component {
      *
      * @return array|false
      */
-    public function getInfo($ip = null) {
+    public function getInfo($ip = null)
+	{
         $is_bot = preg_match(
             "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
             $_SERVER['HTTP_USER_AGENT']
         );
-        if (!$is_bot) :
-            if ($ip) :
-                $userip = $ip;
-            elseif (in_array(Yii::$app->request->userIP, $this->localIp)) :
-                $userip = '';
-            else :
-                $userip = Yii::$app->request->userIP;
-            endif;
-            $curl = new curl\Curl();
-            $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip));
-            if (empty($response->ip))
-                return false;
-            return $response;
-        endif;
-        return false;
+        if ($is_bot) return false;
+
+        if ($ip)
+			$userip = $ip;
+		elseif (in_array(Yii::$app->request->userIP, $this->localIp))
+			$userip = '';
+		else
+			$userip = Yii::$app->request->userIP;
+
+		$this->httpClient = new \GuzzleHttp\Client([
+			'base_uri' => self::URL_API,
+			'timeout' => 36000,
+			'verify' => false,
+		]);
+		$response = json_decode($this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip));
+		if (empty($response->ip))
+			return false;
+		return $response;
     }
 
     /**
@@ -120,12 +125,13 @@ class GeoIp extends Component {
      *
      * @return array|false
      */
-    public function getInfoDb($ip = null) {
-        if ($ip) :
-            $userip = $ip;
-        else :
-            $userip = $this->ip;
-        endif;
+    public function getInfoDb($ip = null)
+	{
+        if ($ip)
+			$userip = $ip;
+		else
+			$userip = $this->ip;
+
         $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/databases/IP2LOCATION-LITE-DB1.BIN');
         $result = $response->lookup($userip);
         if ($result['countryCode'] == 'Invalid IP address.')
@@ -137,22 +143,27 @@ class GeoIp extends Component {
      * Returned IP address of visitor if successful.
      * @return string|false
      */
-    public function getIp() {
-        $is_bot = preg_match(
-            "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
-            $_SERVER['HTTP_USER_AGENT']
-        );
-        if (!$is_bot) :
-            if (in_array(Yii::$app->request->userIP, $this->localIp)) :
-                $curl = new curl\Curl();
-                $response = json_decode($curl->get(self::URL_API . (($this->keySypex) ? $this->keySypex.'/' : '') . 'json/'));
-                if (empty($response->ip))
-                    return Yii::$app->request->userIP;
-                return $response->ip;
-            else :
-                return Yii::$app->request->userIP;
-            endif;
-        endif;
-        return false;
+    public function getIp()
+	{
+		$is_bot = preg_match(
+			"~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
+			$_SERVER['HTTP_USER_AGENT']
+		);
+		if ($is_bot) return false;
+
+		if (in_array(Yii::$app->request->userIP, $this->localIp)) {
+			$this->httpClient = new \GuzzleHttp\Client([
+				'base_uri' => self::URL_API,
+				'timeout' => 36000,
+				'verify' => false,
+			]);
+			$response = json_decode($this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/'));
+			if (empty($response->ip))
+				return Yii::$app->request->userIP;
+			return $response->ip;
+		} else {
+			return Yii::$app->request->userIP;
+		}
     }
+
 }
