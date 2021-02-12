@@ -160,42 +160,46 @@ PHP for controller (for examle)
 
 ```php
 /** Get User Location */
-        if (isset($session['_location'])) :
-            $app->params['userCountry'] = $session['_location']['userCountry'];
-            $app->params['userCountryCode'] = $session['_location']['userCountryCode'];
-            $app->params['userCountryRegion'] = $session['_location']['userCountryRegion'];
-            $app->params['userCountryCity'] = $session['_location']['userCountryCity'];
-        else :
-            $geoip = $app->geoip->info;
-            if (isset($geoip->ip)) :
-                $name = 'name_'.$app->language;
-                if (isset($geoip->country->$name))
-                    $app->params['userCountry'] = $geoip->country->$name;
-                else
-                    $app->params['userCountry'] = $geoip->country->name_en;
-                $app->params['userCountryCode'] = mb_strtolower($geoip->country->iso, 'UTF-8');
-                if (isset($geoip->region->$name))
-                    $app->params['userCountryRegion'] = $geoip->region->$name;
-                else
-                    $app->params['userCountryRegion'] = $geoip->region->name_en;
-                if (isset($geoip->city->$name))
-                    $app->params['userCountryCity'] = $geoip->city->$name;
-                else
-                    $app->params['userCountryCity'] = $geoip->city->name_en;
-            else :
-                $geoip = $app->geoip->infoDb;
-                if (isset($geoip['ipAddress'])) :
-                    $app->params['userCountry'] = $geoip['countryName'];
-                    $app->params['userCountryCode'] = mb_strtolower($geoip['countryCode'], 'UTF-8');
-                endif;
-            endif;
-            $session['_location'] = [
-                'userCountry' => $app->params['userCountry'],
-                'userCountryCode' => $app->params['userCountryCode'],
-                'userCountryRegion' => $app->params['userCountryRegion'],
-                'userCountryCity' => $app->params['userCountryCity'],
-            ];
-        endif;
+        if (isset($session['_location'])) {
+			$app->params['userCountry'] = $session['_location']['userCountry'];
+			$app->params['userCountryCode'] = $session['_location']['userCountryCode'];
+			$app->params['userCountryRegion'] = $session['_location']['userCountryRegion'];
+			$app->params['userCountryCity'] = $session['_location']['userCountryCity'];
+			$app->params['userPhoneCode'] = $session['_location']['userPhoneCode'];
+		} else {
+			$geoip = $app->geoIp->info;
+			if (isset($geoip['ip'])) {
+				$name = 'name_' . $app->language;
+				if (isset($geoip['country'][$name]))
+					$app->params['userCountry'] = $geoip['country'][$name];
+				else
+					$app->params['userCountry'] = $geoip['country']['name_en'];
+				$app->params['userCountryCode'] = mb_strtolower($geoip['country']['iso'], 'UTF-8');
+				if (isset($geoip['region'][$name]))
+					$app->params['userCountryRegion'] = $geoip['region'][$name];
+				else
+					$app->params['userCountryRegion'] = $geoip['region']['name_en'];
+				if (isset($geoip['city'][$name]))
+					$app->params['userCountryCity'] = $geoip['city'][$name];
+				else
+					$app->params['userCountryCity'] = $geoip['city']['name_en'];
+				if (isset($geoip['country']['phone']))
+					$app->params['userPhoneCode'] = $geoip['country']['phone'];
+			} else {
+				$geoip = $app->geoIp->infoDb;
+				if (isset($geoip['ipAddress'])) {
+					$app->params['userCountry'] = $geoip['countryName'];
+					$app->params['userCountryCode'] = mb_strtolower($geoip['countryCode'], 'UTF-8');
+				}
+			}
+			$session['_location'] = [
+				'userCountry' => $app->params['userCountry'],
+				'userCountryCode' => $app->params['userCountryCode'],
+				'userCountryRegion' => $app->params['userCountryRegion'],
+				'userCountryCity' => $app->params['userCountryCity'],
+				'userPhoneCode' => $app->params['userPhoneCode'],
+			];
+		}
 ```
 
 params.php
@@ -207,6 +211,7 @@ return [
     'userCountryCode' => 'wl',
     'userCountryRegion' => '',
     'userCountryCity' => '',
+    'userPhoneCode' => '375',
     ...
 ];
 ```
