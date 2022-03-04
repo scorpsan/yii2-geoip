@@ -2,9 +2,11 @@
 namespace scorpsan\geoip;
 
 use yii\base\Component;
+use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use IP2Location\Database;
 use Yii;
+use yii\base\Exception;
 
 class GeoIp extends Component
 {
@@ -99,25 +101,34 @@ class GeoIp extends Component
         );
         if ($is_bot) return false;
 
-        if ($ip)
-            $userip = $ip;
-		elseif (in_array(Yii::$app->request->userIP, $this->localIp))
-			$userip = '';
-		else
-			$userip = Yii::$app->request->userIP;
-		$userip = '';
-		$this->httpClient = new \GuzzleHttp\Client([
-			'base_uri' => self::URL_API,
-			'timeout' => 36000,
-			'verify' => false,
-		]);
-		$response = $this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip);
+        try {
+            if ($ip)
+                $userip = $ip;
+            elseif (in_array(Yii::$app->request->userIP, $this->localIp))
+                $userip = '';
+            else
+                $userip = Yii::$app->request->userIP;
 
-		$result = json_decode($response->getBody(), true);
+            // all IP detected by Sypex
+            $userip = '';
 
-		if (!empty($result['ip'])) return $result;
+            $this->httpClient = new Client([
+                'base_uri' => self::URL_API,
+                'timeout' => 36000,
+                'verify' => false,
+            ]);
+            $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip);
 
-		return false;
+            $result = json_decode($response->getBody(), true);
+
+            if (empty($result['ip'])) throw new Exception('IP address not found or Sypex error');
+
+        } catch (Exception $exception) {
+            Yii::error($exception->getMessage());
+            return false;
+        }
+
+		return $result;
     }
 
     /**
@@ -133,12 +144,14 @@ class GeoIp extends Component
         if ($ip)
 			$userip = $ip;
 		else
-			$userip = $this->ip;
+			$userip = $this->getIp();
 
         $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/databases/IP2LOCATION-LITE-DB1.BIN');
         $result = $response->lookup($userip);
+
         if ($result['countryCode'] == 'Invalid IP address.')
             return false;
+
         return $result;
     }
 
@@ -154,20 +167,28 @@ class GeoIp extends Component
 		);
 		if ($is_bot) return false;
 
-		if (in_array(Yii::$app->request->userIP, $this->localIp)) {
-			$this->httpClient = new \GuzzleHttp\Client([
-				'base_uri' => self::URL_API,
-				'timeout' => 36000,
-				'verify' => false,
-			]);
-			$response = $this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/');
+        if (!in_array(Yii::$app->request->userIP, $this->localIp)) {
+            return Yii::$app->request->userIP;
+        }
 
-			$result = json_decode($response->getBody(), true);
+		try {
+            $this->httpClient = new Client([
+                'base_uri' => self::URL_API,
+                'timeout' => 36000,
+                'verify' => false,
+            ]);
+            $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/');
 
-			if (!empty($result['ip'])) return $result['ip'];
-		}
+            $result = json_decode($response->getBody(), true);
 
-		return Yii::$app->request->userIP;
+            if (empty($result['ip'])) throw new Exception('IP address not found or Sypex error');
+
+        } catch (Exception $exception) {
+            Yii::error($exception->getMessage());
+            return false;
+        }
+
+        return $result['ip'];
     }
 
 }
