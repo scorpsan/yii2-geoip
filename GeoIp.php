@@ -4,6 +4,8 @@ namespace scorpsan\geoip;
 use yii\base\Component;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
 use IP2Location\Database;
 use Yii;
 use yii\base\Exception;
@@ -29,7 +31,7 @@ class GeoIp extends Component
      */
     public $keySypex = '';
 
-    public $timeout = 600;
+    public $timeout = 5;
 
     /**
      * Returned information by IP address with following paramters:
@@ -102,22 +104,17 @@ class GeoIp extends Component
             "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
             $_SERVER['HTTP_USER_AGENT']
         );
-        if ($is_bot) return false;
+        if ($is_bot) return array();
 
         try {
+            $userip = '';
             if ($ip)
                 $userip = $ip;
-            elseif (in_array(Yii::$app->request->userIP, $this->localIp))
-                $userip = '';
-            else
-                $userip = Yii::$app->request->userIP;
-
-            // all IP detected by Sypex
-            $userip = '';
 
             $this->httpClient = new Client([
                 'base_uri' => self::URL_API,
-                'timeout' => $this->timeout,
+                'timeout' => $this->timeout, // Response timeout
+                'connect_timeout' => $this->timeout, // Connection timeout
                 'verify' => false,
             ]);
             $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip);
@@ -126,9 +123,15 @@ class GeoIp extends Component
 
             if (empty($result['ip'])) throw new Exception('IP address not found or Sypex error');
 
+        } catch (RequestException $requestException) {
+            Yii::error($requestException->getMessage());
+            return array();
+        } catch (ConnectException $connectException) {
+            Yii::error($connectException->getMessage());
+            return array();
         } catch (Exception $exception) {
             Yii::error($exception->getMessage());
-            return false;
+            return array();
         }
 
 		return $result;
@@ -168,7 +171,7 @@ class GeoIp extends Component
 			"~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
 			$_SERVER['HTTP_USER_AGENT']
 		);
-		if ($is_bot) return false;
+		if ($is_bot) return null;
 
         if (!in_array(Yii::$app->request->userIP, $this->localIp)) {
             return Yii::$app->request->userIP;
@@ -177,7 +180,8 @@ class GeoIp extends Component
 		try {
             $this->httpClient = new Client([
                 'base_uri' => self::URL_API,
-                'timeout' => $this->timeout,
+                'timeout' => $this->timeout, // Response timeout
+                'connect_timeout' => $this->timeout, // Connection timeout
                 'verify' => false,
             ]);
             $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/');
@@ -186,9 +190,15 @@ class GeoIp extends Component
 
             if (empty($result['ip'])) throw new Exception('IP address not found or Sypex error');
 
+        } catch (RequestException $requestException) {
+            Yii::error($requestException->getMessage());
+            return null;
+        } catch (ConnectException $connectException) {
+            Yii::error($connectException->getMessage());
+            return null;
         } catch (Exception $exception) {
             Yii::error($exception->getMessage());
-            return false;
+            return null;
         }
 
         return $result['ip'];
