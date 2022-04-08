@@ -36,8 +36,8 @@ Add following code to your configuration file of application:
         'class' => 'scorpsan\geoip\GeoIp',
 // uncomment next line if you register on sypexgeo.net and paste your key        
 //        'keySypex' => 'key-sypexgeo-net-this',
-// if need more timeout (default 600)
-//        'timeout' => 3600,
+// if need more timeout (default 5 = 5000 millisecond)
+//        'timeout' => 6,
     ],
     ...
 ],
