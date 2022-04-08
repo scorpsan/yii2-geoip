@@ -16,6 +16,7 @@ class GeoIp extends Component
      */ 
     const URL_API = 'http://api.sypexgeo.net/';
 
+
     /**
      * Array local IP
      */
@@ -27,6 +28,8 @@ class GeoIp extends Component
      * more info on https://sypexgeo.net/
      */
     public $keySypex = '';
+
+    public $timeout = 600;
 
     /**
      * Returned information by IP address with following paramters:
@@ -114,7 +117,7 @@ class GeoIp extends Component
 
             $this->httpClient = new Client([
                 'base_uri' => self::URL_API,
-                'timeout' => 36000,
+                'timeout' => $this->timeout,
                 'verify' => false,
             ]);
             $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex.'/' : '') . 'json/' . $userip);
@@ -174,7 +177,7 @@ class GeoIp extends Component
 		try {
             $this->httpClient = new Client([
                 'base_uri' => self::URL_API,
-                'timeout' => 36000,
+                'timeout' => $this->timeout,
                 'verify' => false,
             ]);
             $response = $this->httpClient->get((($this->keySypex) ? $this->keySypex . '/' : '') . 'json/');
