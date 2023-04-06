@@ -12,6 +12,7 @@ use yii\base\Exception;
 
 class GeoIp extends Component
 {
+    /** @var Client */
     private $httpClient;
     /**
      * URL of API methods.
@@ -152,8 +153,8 @@ class GeoIp extends Component
 		else
 			$userip = $this->getIp();
 
-        $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/databases/IP2LOCATION-LITE-DB1.BIN');
-        $result = $response->lookup($userip);
+        $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/data/IP2LOCATION-LITE-DB1.BIN', \IP2Location\Database::FILE_IO);
+        $result = $response->lookup($userip, \IP2Location\Database::ALL);
 
         if ($result['countryCode'] == 'Invalid IP address.')
             return false;
