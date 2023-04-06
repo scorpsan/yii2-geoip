@@ -152,6 +152,8 @@ class GeoIp extends Component
 			$userip = $ip;
 		else
 			$userip = $this->getIp();
+		if (!$userip)
+		    return false;
 
         $response = new Database(Yii::getAlias('@vendor') . '/ip2location/ip2location-php/data/IP2LOCATION-LITE-DB1.BIN', \IP2Location\Database::FILE_IO);
         $result = $response->lookup($userip, \IP2Location\Database::ALL);
