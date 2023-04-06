@@ -13,7 +13,7 @@
     "require": {
         "yiisoft/yii2": "*",
         "guzzlehttp/guzzle": "^7.2",
-        "ip2location/ip2location-php": "*"
+        "ip2location/ip2location-php": "^9.0"
     },
     "autoload": {
         "psr-4": {
