@@ -101,6 +101,10 @@ class GeoIp extends Component
      */
     public function getInfo($ip = null)
     {
+        if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+            return array();
+        }
+        
         $is_bot = preg_match(
             "~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
             $_SERVER['HTTP_USER_AGENT']
@@ -170,6 +174,10 @@ class GeoIp extends Component
      */
     public function getIp()
 	{
+	    if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+	        return null;
+        }
+
 		$is_bot = preg_match(
 			"~(Google|Yahoo|Rambler|Bot|Yandex|Spider|Snoopy|Crawler|Finder|Mail|curl)~i",
 			$_SERVER['HTTP_USER_AGENT']
